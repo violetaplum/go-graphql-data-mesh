@@ -1,0 +1,104 @@
+# deployments/docker-compose.yml
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: deployments/Dockerfile
+    container_name: graphql_app
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - POSTGRES_URL=postgres://postgres:postgres@postgres:5432/multidb?sslmode=disable
+      - MONGODB_URL=mongodb://mongo:27017/multidb
+      - NEO4J_URL=bolt://neo4j:7687
+      - REDIS_URL=redis:6379
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - JWT_SECRET=your-secret-key
+      - ENV=development
+    depends_on:
+      - postgres
+      - mongo
+      - neo4j
+      - redis
+      - elasticsearch
+    volumes:
+      - ../:/app
+    networks:
+      - app-network
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: graphql_postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=multidb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  mongo:
+    image: mongo:7
+    container_name: graphql_mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - app-network
+
+  neo4j:
+    image: neo4j:5
+    container_name: graphql_neo4j
+    restart: always
+    environment:
+      - NEO4J_AUTH=neo4j/password
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+    networks:
+      - app-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: graphql_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+
+  elasticsearch:
+    image: elasticsearch:8.12.0
+    container_name: graphql_elasticsearch
+    restart: always
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  mongo_data:
+  neo4j_data:
+  elasticsearch_data:

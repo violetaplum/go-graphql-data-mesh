@@ -11,10 +11,6 @@
 
 A powerful Go-based GraphQL server that seamlessly integrates multiple databases into a unified API. This project demonstrates how to combine relational, document, graph, key-value, and search databases in a single coherent system using clean architecture principles.
 
-<p align="center">
-  <img src="https://via.placeholder.com/800x400?text=Multi-DB+GraphQL+Architecture" alt="Architecture Diagram">
-</p>
-
 ## ✨ Features
 
 - **Unified GraphQL API** - Seamlessly query data across multiple database systems
